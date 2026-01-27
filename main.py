@@ -177,8 +177,8 @@ def get_narocila(nar: Narocilo1):
                             "IDModel": row[9],
                             "IDZnamka": row[10],
                             "IDPonudba": row[11],
-                            "NazivZnamke": vozila.get(row[10], {}).get("NazivZnamke", row[10]) or row[10],
-                            "NazivModel": vozila.get(row[8], {}).get("NazivModel", row[8]) or row[8],
+                            "NazivZnamke": vozila.get(row[8], {}).get("NazivZnamke", row[8]) or row[10],
+                            "NazivModel": vozila.get(row[8], {}).get("NazivModel", row[8]) or row[9],
                             "NazivPoslovalnice": poslovalnice.get(row[5], {}).get("NazivPoslovalnice", row[5]) or row[5],
                             "NazivStoritve": storitve.get(row[6], {}) or row[6]
                         } 
