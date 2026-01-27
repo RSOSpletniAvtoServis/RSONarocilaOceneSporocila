@@ -13,8 +13,9 @@ import os
 import requests
 
 adminbaza = os.getenv("ADMINBAZA", "RSOAdminVozila")
-SERVICE_ADMVOZ_URL = os.getenv("SERVICE_ADMVOZ_URL")
+SERVICE_ADMVOZ_URL = os.getenv("SERVICE_ADMVOZ_URL","http://admvoz:8000")
 SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL","http://upopri:8000")
+SERVICE_POSZAP_URL = os.getenv("SERVICE_UPOPRI_URL","http://poszap:8000")
 
 def validate_identifier(name: str) -> str:
     if not re.fullmatch(r"[A-Za-z0-9_]{1,64}", name):
@@ -116,11 +117,11 @@ def get_narocila(nar: Narocilo1):
     userid = nar.uniqueid
     nacin = ""
     if nar.mode == '1':
-        nacin = " Zavrnjen != 1 AND Zakljucen != 1 AND Potrjen != 1"
+        nacin = " Zavrnjen IS NULL 1 AND Zakljucen IS NULL 1 AND Potrjen IS NULL 1"
     elif nar.mode == '2':
-        nacin = " Zavrnjen != 1 AND Potrjen = 1 AND Zakljucen != 1"
+        nacin = " Zavrnjen IS NULL AND Potrjen = 1 AND Zakljucen IS NULL"
     elif nar.mode == '3':
-        nacin = " Zavrnjen != 1 AND Zakljucen = 1"
+        nacin = " Zavrnjen IS NULL AND Zakljucen = 1"
         
     try:
         with pool.get_connection() as conn:
@@ -135,17 +136,19 @@ def get_narocila(nar: Narocilo1):
                 stranka1 = dobiStranko(nar.iduporabnik,nar.uniqueid)
                 if stranka1["Narocilo"] == "passed":
                     idstranka = stranka1["IDStranka"]
-                    sql = "SELECT DISTINCT StevilkaSasije FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s"
+                    sql = "SELECT DISTINCT StevilkaSasije FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
-                    sasije = list({
-                    row[0]
-                    for row in rows
-                    if row[0] is not None
-                    })
+                    sasije = list({ row[0] for row in rows if row[0] is not None })
                     print(sasije)
                     vozila = dobiVozila(sasije,nar.iduporabnik,nar.uniqueid)
-                    print(vozila)
+                    sql = "SELECT DISTINCT IDPoslovalnica FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
+                    cursor.execute(sql,(idstranka,))
+                    rows = cursor.fetchall()
+                    idpos = list({ row[0] for row in rows if row[0] is not None })
+                    print(idpos)
+                    poslovalnice = dobiPoslovalnice(idpos,nar.idtennant,nar.uniqueid)
+                    print(poslovalnice)
                     return {"Narocilo": "failed"}
 
                 
@@ -157,6 +160,24 @@ def get_narocila(nar: Narocilo1):
 
 
 # Konec narocila
+
+def dobiPoslovalnice(idpos,idtennant,uniqueid):
+    try:
+        data = {"idpos": idpos, "idtennant": idtennant, "uniqueid": uniqueid}
+        response = requests.post(f"{SERVICE_POSZAP_URL}/izbraneposlovalnice/", json=data, timeout=5)
+        #response.raise_for_status()  # Raise exception for HTTP errors  
+        print(response)
+        if "application/json" not in response.headers.get("Content-Type", ""):
+            return {"Status": "failed"}
+        else:
+            result = response.json()
+            print(result)
+            return result
+    except Exception as e:
+        print("Prislo je do napake: ", e)
+        return {"Status": "failed", "Error": e}
+    return {"Status": "failed"}
+    
 
 
 def dobiVozila(stsas,iduporabnik,uniqueid):
