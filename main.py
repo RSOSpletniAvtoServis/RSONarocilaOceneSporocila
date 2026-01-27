@@ -149,6 +149,13 @@ def get_narocila(nar: Narocilo1):
                     print(idpos)
                     poslovalnice = dobiPoslovalnice(idpos,nar.idtennant,nar.uniqueid)
                     print(poslovalnice)
+                    sql = "SELECT DISTINCT IDStoritev FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
+                    cursor.execute(sql,(idstranka,))
+                    rows = cursor.fetchall()
+                    idstor = list({ row[0] for row in rows if row[0] is not None })
+                    print(idstor)
+                    storitve = dobiStoritve(idstor,nar.uniqueid)
+                    print(poslovalnice)
                     return {"Narocilo": "failed"}
 
                 
@@ -160,6 +167,24 @@ def get_narocila(nar: Narocilo1):
 
 
 # Konec narocila
+
+def dobiStoritve(idstor,uniqueid):
+    try:
+        data = {"ids": idstor,"uniqueid": uniqueid}
+        response = requests.post(f"{SERVICE_ADMVOZ_URL}/izbranestoritve/", json=data, timeout=5)
+        #response.raise_for_status()  # Raise exception for HTTP errors  
+        print(response)
+        if "application/json" not in response.headers.get("Content-Type", ""):
+            return {"Status": "failed"}
+        else:
+            result = response.json()
+            print(result)
+            return result
+    except Exception as e:
+        print("Prislo je do napake: ", e)
+        return {"Status": "failed", "Error": e}
+    return {"Status": "failed"}
+
 
 def dobiPoslovalnice(idpos,idtennant,uniqueid):
     try:
