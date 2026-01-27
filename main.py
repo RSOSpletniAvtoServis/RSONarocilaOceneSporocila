@@ -92,8 +92,7 @@ def dodaj_narocilo(narocilo: Narocilo):
                 result = response.json()
                 idstranka = result["IDStranka"]
                 print(idstranka)
-                print(result)
-                return {"Narocilo": "failed"}   
+                print(result)   
                 sql = "INSERT INTO "+tennanDB+".Narocilo(Cas,Datum,IDStranka,IDPoslovalnica,IDStoritev,StevilkaSasije,IDModel,IDZnamka,IDPonudba) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
                 cursor.execute(sql,(narocilo.ura,narocilo.datum,idstranka,narocilo.idposlovalnica,narocilo.idstoritev,narocilo.stsas,narocilo.idmodel,narocilo.idznamka,narocilo.idponudba))
                 # Fixed columns → no need to read cursor.description
