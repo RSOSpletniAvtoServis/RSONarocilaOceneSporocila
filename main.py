@@ -114,6 +114,14 @@ class Narocilo1(BaseModel):
 @app.post("/narocilastranka/")
 def get_poslovalnice(nar: Narocilo1):
     userid = posl.uniqueid
+    nacin = ""
+    if nar.mode == '1':
+        nacin = " Zavrnjen != 1 AND Opravljen != 1 AND Potrjen != 1"
+    elif nar.mode == '2':
+        nacin = " Zavrnjen != 1 AND Potrjen = 1 AND Opravljen != 1"
+    elif nar.mode == '3':
+        nacin = " Zavrnjen != 1 AND Opravljen = 1"
+        
     try:
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
@@ -124,16 +132,22 @@ def get_poslovalnice(nar: Narocilo1):
                 if row is None:
                     raise HTTPException(status_code=404, detail="DB not found")
                 tennantDB = row[1]
+                stranka1 = dobiStranko(nar.iduporabnik,nar.uniqueid)
+                if stranka1["Narocilo"] == "passed":
+                    idstranka = stranka1["IDStranka"]
+                    sql = "SELECT DISTINCT StevilkaSasije FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND "+nacin
+                    cursor.execute(sql,(idstranka,))
+                    rows = cursor.fetchall()
+                    sasije = list({
+                    row[0]
+                    for row in rows
+                    if row[0] is not None
+                    })
+                    print(sasije)
+                    vozila = dobiVozila(sasije,voz.uniqueid)
+                    print(vozila)
+                    return {"Narocilo": "failed"}
 
-                cursor.execute("SELECT StevilkaSasije FROM "+ tennantDB +".Narocilo WHERE ")
-                rows = cursor.fetchall()
-                kraji_ids = list({
-                row[0]
-                for row in rows
-                if row[0] is not None
-                })
-                print(kraji_ids)
-                fail = 0
                 
     except Exception as e:
         print("DB error:", e)
@@ -145,10 +159,10 @@ def get_poslovalnice(nar: Narocilo1):
 # Konec narocila
 
 
-def dobiVozila(ids):
+def dobiVozila(stsas,uniqueid):
     try:
-        data = {"ids": kraji_ids, "uniqueid": posl.uniqueid}
-        response = requests.post(f"{SERVICE_ADMVOZ_URL}/izbranikraji/", json=data, timeout=5)
+        data = {"stsas": stsas, "uniqueid": uniqueid}
+        response = requests.post(f"{SERVICE_ADMVOZ_URL}/izbranavozila/", json=data, timeout=5)
         #response.raise_for_status()  # Raise exception for HTTP errors  
         print(response)
         if "application/json" not in response.headers.get("Content-Type", ""):
