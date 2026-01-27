@@ -135,7 +135,7 @@ def get_narocila(nar: Narocilo1):
                 stranka1 = dobiStranko(nar.iduporabnik,nar.uniqueid)
                 if stranka1["Narocilo"] == "passed":
                     idstranka = stranka1["IDStranka"]
-                    sql = "SELECT DISTINCT StevilkaSasije FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND "+nacin
+                    sql = "SELECT DISTINCT StevilkaSasije FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s"
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
                     sasije = list({
@@ -144,7 +144,7 @@ def get_narocila(nar: Narocilo1):
                     if row[0] is not None
                     })
                     print(sasije)
-                    vozila = dobiVozila(sasije,nar.uniqueid)
+                    vozila = dobiVozila(sasije,nar.iduporabnik,nar.uniqueid)
                     print(vozila)
                     return {"Narocilo": "failed"}
 
@@ -159,9 +159,9 @@ def get_narocila(nar: Narocilo1):
 # Konec narocila
 
 
-def dobiVozila(stsas,uniqueid):
+def dobiVozila(stsas,iduporabnik,uniqueid):
     try:
-        data = {"stsas": stsas, "uniqueid": uniqueid}
+        data = {"stsas": stsas, "iduporabnik": iduporabnik, "uniqueid": uniqueid}
         response = requests.post(f"{SERVICE_ADMVOZ_URL}/izbranavozila/", json=data, timeout=5)
         #response.raise_for_status()  # Raise exception for HTTP errors  
         print(response)
