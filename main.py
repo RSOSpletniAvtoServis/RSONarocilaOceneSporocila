@@ -163,7 +163,9 @@ def get_narocila(nar: Narocilo1):
                     sql = "SELECT IDNarocilo, Cas, Datum, DatumZakljucka, IDStranka, IDPoslovalnica, IDStoritev, IDStatus, StevilkaSasije, IDModel, IDZnamka, IDPonudba FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
-                    return {"IDNarocilo": row[0],
+                    return [
+                        {  
+                            "IDNarocilo": row[0],
                             "Cas": row[1],
                             "Datum": row[2],
                             "DatumZakljucka": row[3],
@@ -179,7 +181,8 @@ def get_narocila(nar: Narocilo1):
                             "NazivModel": vozila.get(row[8], {}).get("NazivModel", row[8]) or row[8],
                             "NazivPoslovalnice": poslovalnice.get(row[5], {}).get("NazivPoslovalnice", row[5]) or row[5],
                             "NazivStoritve": storitve.get(row[6], {}) or row[6]
-                            for row in rows}
+                        } 
+                            for row in rows ]
 
                 
     except Exception as e:
