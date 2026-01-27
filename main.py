@@ -72,7 +72,7 @@ def dodaj_narocilo(narocilo: Narocilo):
         conn = pool.get_connection()
         cursor = conn.cursor()
         
-        query = "SELECT IDTennant, TennantDBPoslovalnice FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
+        query = "SELECT IDTennant, TennantDBNarocila FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
         cursor.execute(query,(narocilo.idtennant,))
         row = cursor.fetchone()
         if row is None:
@@ -93,34 +93,16 @@ def dodaj_narocilo(narocilo: Narocilo):
                 idstranka = result["IDStranka"]
                 print(idstranka)
                 print(result)
-                return {"Narocilo": "failed"}     
-                cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
-                rows = cursor.fetchall()
+                return {"Narocilo": "failed"}   
+                sql = "INSERT INTO "+tennanDB+".Narocilo(Cas,Datum,IDStranka,IDPoslovalnica,IDStoritev,StevilkaSasije,IDModel,IDZnamka,IDPonudba) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                cursor.execute(sql,(narocilo.ura,narocilo.datum,idstranka,narocilo.idposlovalnica,narocilo.idstoritev,narocilo.stsas,narocilo.idmodel,narocilo.idznamka,narocilo.idponudba))
                 # Fixed columns → no need to read cursor.description
-                return [
-                    {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4], "username": result.get(str(row[4]))}
-                    for row in rows
-                ]
+                return {"Narocilo": "passed"}
         except Exception as e:
             print("Prislo je do napake: ", e)
-            return {"Narocilo": "failed"}
+            return {"Narocilo": "failed", "Error": e}
 
 # end        
-        
-        sql = "INSERT INTO Uporabnik(UporabniskoIme,Geslo,Vloga,UniqueID,IDTennant) VALUES (%s,%s,%s,%s,%s)"
-        cursor.execute(sql, (zaposleni.username,hash,2,timestamp,zaposleni.idtennant))
-        
-        query = "SELECT IDUporabnik, UporabniskoIme, Vloga, UniqueID FROM Uporabnik WHERE UporabniskoIme = %s"
-        cursor.execute(query,(zaposleni.username,))
-        row = cursor.fetchone()
-
-        if row is None:
-            raise HTTPException(status_code=404, detail="Znamka not found")
-
-        return {"Narocilo": "passed"}
-
-        
-        
         
     except Exception as e:
         print("Error: ", e)
