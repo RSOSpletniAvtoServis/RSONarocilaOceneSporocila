@@ -136,12 +136,14 @@ def get_narocila(nar: Narocilo1):
                 stranka1 = dobiStranko(nar.iduporabnik,nar.uniqueid)
                 if stranka1["Narocilo"] == "passed":
                     idstranka = stranka1["IDStranka"]
+                    
                     sql = "SELECT DISTINCT StevilkaSasije FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
                     sasije = list({ row[0] for row in rows if row[0] is not None })
                     print(sasije)
                     vozila = dobiVozila(sasije,nar.iduporabnik,nar.uniqueid)
+                    
                     sql = "SELECT DISTINCT IDPoslovalnica FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
@@ -149,20 +151,42 @@ def get_narocila(nar: Narocilo1):
                     print(idpos)
                     poslovalnice = dobiPoslovalnice(idpos,nar.idtennant,nar.uniqueid)
                     print(poslovalnice)
+                    
                     sql = "SELECT DISTINCT IDStoritev FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
                     idstor = list({ row[0] for row in rows if row[0] is not None })
                     print(idstor)
                     storitve = dobiStoritve(idstor,nar.uniqueid)
-                    print(poslovalnice)
-                    return {"Narocilo": "failed"}
+                    print(storitve)
+                    
+                    sql = "SELECT IDNarocilo, Cas, Datum, DatumZakljucka, IDStranka, IDPoslovalnica, IDStoritev, IDStatus, StevilkaSasije, 
+                    IDModel, IDZnamka, IDPonudba FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
+                    cursor.execute(sql,(idstranka,))
+                    rows = cursor.fetchall()
+                    return {"IDNarocilo": row[0],
+                            "Cas": row[1],
+                            "Datum": row[2],
+                            "DatumZakljucka": row[3],
+                            "IDStranka": row[4],
+                            "IDPoslovalnica": row[5],
+                            "IDStoritev": row[6],
+                            "IDStatus": row[7],
+                            "StevilkaSasije": row[8],
+                            "IDModel": row[9],
+                            "IDZnamka": row[10],
+                            "IDPonudba": row[11],
+                            "NazivZnamke": vozila[row[8]]["NazivZnamke"],
+                            "NazivModel": vozila[row[8]]["NazivModel"],
+                            "NazivPoslovalnice": poslovalnice[row[5]]["NazivPoslovalnice"],
+                            "NazivStoritve": storitve[row[6]
+                            for row in rows}
 
                 
     except Exception as e:
         print("DB error:", e)
         #raise HTTPException(status_code=500, detail="Database error")
-    return {"Poslovalnica": "failed"} 
+    return {"Narocilo": "failed"} 
 
 
 
