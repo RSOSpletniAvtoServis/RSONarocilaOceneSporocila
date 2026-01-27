@@ -117,7 +117,7 @@ def get_narocila(nar: Narocilo1):
     userid = nar.uniqueid
     nacin = ""
     if nar.mode == '1':
-        nacin = " Zavrnjen IS NULL 1 AND Zakljucen IS NULL 1 AND Potrjen IS NULL 1"
+        nacin = " Zavrnjen IS NULL AND Zakljucen IS NULL AND Potrjen IS NULL"
     elif nar.mode == '2':
         nacin = " Zavrnjen IS NULL AND Potrjen = 1 AND Zakljucen IS NULL"
     elif nar.mode == '3':
