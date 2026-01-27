@@ -81,7 +81,7 @@ def dodaj_narocilo(narocilo: Narocilo):
         
 # start 
 
-        stranka1 = dobiStranko(narocila.iduporabnik,narocilo.uniqueid)
+        stranka1 = dobiStranko(narocilo.iduporabnik,narocilo.uniqueid)
         if stranka1["Narocilo"] == "passed":
             idstranka = stranka1["IDStranka"]
             sql = "INSERT INTO "+tennantDB+".Narocilo(Cas,Datum,IDStranka,IDPoslovalnica,IDStoritev,StevilkaSasije,IDModel,IDZnamka,IDPonudba) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
