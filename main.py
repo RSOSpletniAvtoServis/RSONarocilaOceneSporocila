@@ -90,6 +90,8 @@ def dodaj_narocilo(narocilo: Narocilo):
                 return {"Narocilo": "failed"}
             else:
                 result = response.json()
+                idstranka = result["IDStranka"]
+                print(idstranka)
                 print(result)
                 return {"Narocilo": "failed"}     
                 cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
