@@ -81,25 +81,15 @@ def dodaj_narocilo(narocilo: Narocilo):
         
 # start 
 
-        try:
-            data = {"iduporabnik": narocilo.iduporabnik, "uniqueid": narocilo.uniqueid}
-            response = requests.post(f"{SERVICE_UPOPRI_URL}/stranka/", json=data, timeout=5)
-            #response.raise_for_status()  # Raise exception for HTTP errors  
-            print(response)
-            if "application/json" not in response.headers.get("Content-Type", ""):
-                return {"Narocilo": "failed"}
-            else:
-                result = response.json()
-                idstranka = result["IDStranka"]
-                print(idstranka)
-                print(result)   
-                sql = "INSERT INTO "+tennantDB+".Narocilo(Cas,Datum,IDStranka,IDPoslovalnica,IDStoritev,StevilkaSasije,IDModel,IDZnamka,IDPonudba) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-                cursor.execute(sql,(narocilo.ura,narocilo.datum,idstranka,narocilo.idposlovalnica,narocilo.idstoritev,narocilo.stsas,narocilo.idmodel,narocilo.idznamka,narocilo.idponudba))
-                # Fixed columns → no need to read cursor.description
-                return {"Narocilo": "passed"}
-        except Exception as e:
-            print("Prislo je do napake: ", e)
-            return {"Narocilo": "failed", "Error": e}
+        stranka1 = dobiStranko(narocila.iduporabnik,narocilo.uniqueid)
+        if stranka1["Narocilo"] == "passed":
+            idstranka = stranka1["IDStranka"]
+            sql = "INSERT INTO "+tennantDB+".Narocilo(Cas,Datum,IDStranka,IDPoslovalnica,IDStoritev,StevilkaSasije,IDModel,IDZnamka,IDPonudba) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+            cursor.execute(sql,(narocilo.ura,narocilo.datum,idstranka,narocilo.idposlovalnica,narocilo.idstoritev,narocilo.stsas,narocilo.idmodel,narocilo.idznamka,narocilo.idponudba))
+            # Fixed columns → no need to read cursor.description
+            return {"Narocilo": "passed"}
+        else:
+            return stranka1
 
 # end        
         
@@ -112,5 +102,83 @@ def dodaj_narocilo(narocilo: Narocilo):
     return {"Narocilo": "undefined"}
 
 
+# Zacetek narocila
+
+class Narocilo1(BaseModel):
+    idtennant: str
+    iduporabnik: str
+    mode: str
+    uniqueid: str
+
+
+@app.post("/narocilastranka/")
+def get_poslovalnice(nar: Narocilo1):
+    userid = posl.uniqueid
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                # get tennant db
+                query = "SELECT IDTennant, TennantDBNarocila FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
+                cursor.execute(query,(nar.idtennant,))
+                row = cursor.fetchone()
+                if row is None:
+                    raise HTTPException(status_code=404, detail="DB not found")
+                tennantDB = row[1]
+
+                cursor.execute("SELECT StevilkaSasije FROM "+ tennantDB +".Narocilo WHERE ")
+                rows = cursor.fetchall()
+                kraji_ids = list({
+                row[0]
+                for row in rows
+                if row[0] is not None
+                })
+                print(kraji_ids)
+                fail = 0
+                
+    except Exception as e:
+        print("DB error:", e)
+        #raise HTTPException(status_code=500, detail="Database error")
+    return {"Poslovalnica": "failed"} 
+
+
+
+# Konec narocila
+
+
+def dobiVozila(ids):
+    try:
+        data = {"ids": kraji_ids, "uniqueid": posl.uniqueid}
+        response = requests.post(f"{SERVICE_ADMVOZ_URL}/izbranikraji/", json=data, timeout=5)
+        #response.raise_for_status()  # Raise exception for HTTP errors  
+        print(response)
+        if "application/json" not in response.headers.get("Content-Type", ""):
+            return {"Status": "failed"}
+        else:
+            result = response.json()
+            print(result)
+            return result
+    except Exception as e:
+        print("Prislo je do napake: ", e)
+        return {"Status": "failed", "Error": e}
+    return {"Status": "failed"}
+
+def dobiStranko(iduporabnik,uniqueid):
+    try:
+        data = {"iduporabnik": iduporabnik, "uniqueid": uniqueid}
+        response = requests.post(f"{SERVICE_UPOPRI_URL}/stranka/", json=data, timeout=5)
+        #response.raise_for_status()  # Raise exception for HTTP errors  
+        print(response)
+        if "application/json" not in response.headers.get("Content-Type", ""):
+            return {"Narocilo": "failed"}
+        else:
+            result = response.json()
+            idstranka = result["IDStranka"]
+            print(idstranka)
+            print(result)
+            return {"Narocilo": "passed", "IDStranka": idstranka}
+    except Exception as e:
+        print("Prislo je do napake: ", e)
+        return {"Narocilo": "failed", "Error": e}
+    return {"Narocilo": "failed"}
 #Konec narocilo
     
