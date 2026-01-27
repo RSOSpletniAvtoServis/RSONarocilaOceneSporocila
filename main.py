@@ -15,7 +15,7 @@ import requests
 adminbaza = os.getenv("ADMINBAZA", "RSOAdminVozila")
 SERVICE_ADMVOZ_URL = os.getenv("SERVICE_ADMVOZ_URL","http://admvoz:8000")
 SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL","http://upopri:8000")
-SERVICE_POSZAP_URL = os.getenv("SERVICE_UPOPRI_URL","http://poszap:8000")
+SERVICE_POSZAP_URL = os.getenv("SERVICE_POSZAP_URL","http://poszap:8000")
 
 def validate_identifier(name: str) -> str:
     if not re.fullmatch(r"[A-Za-z0-9_]{1,64}", name):
