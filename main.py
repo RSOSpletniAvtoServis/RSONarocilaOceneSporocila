@@ -53,7 +53,6 @@ def read_root():
 # Zacetek narocilo
 
 class Narocilo(BaseModel):
-
     idtennant: str
     iduporabnik: str
     stsas: str
@@ -83,7 +82,7 @@ def dodaj_narocilo(narocilo: Narocilo):
 # start 
 
         try:
-            data = {"iduporabnik": narocilo.iduporabnik, "uniqueid": vodja.uniqueid}
+            data = {"iduporabnik": narocilo.iduporabnik, "uniqueid": narocilo.uniqueid}
             response = requests.post(f"{SERVICE_UPOPRI_URL}/stranka/", json=data, timeout=5)
             #response.raise_for_status()  # Raise exception for HTTP errors  
             print(response)
