@@ -144,7 +144,7 @@ def get_narocila(nar: Narocilo1):
                     if row[0] is not None
                     })
                     print(sasije)
-                    vozila = dobiVozila(sasije,voz.uniqueid)
+                    vozila = dobiVozila(sasije,nar.uniqueid)
                     print(vozila)
                     return {"Narocilo": "failed"}
 
