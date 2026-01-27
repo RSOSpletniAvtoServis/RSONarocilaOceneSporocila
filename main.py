@@ -112,8 +112,8 @@ class Narocilo1(BaseModel):
 
 
 @app.post("/narocilastranka/")
-def get_poslovalnice(nar: Narocilo1):
-    userid = posl.uniqueid
+def get_narocila(nar: Narocilo1):
+    userid = nar.uniqueid
     nacin = ""
     if nar.mode == '1':
         nacin = " Zavrnjen != 1 AND Opravljen != 1 AND Potrjen != 1"
