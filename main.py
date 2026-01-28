@@ -550,6 +550,37 @@ def zakljuci_narocilo(nar: Nar):
     
     
     
+@app.post("/statusnarocila/")
+def statusnarocila(nar: Nar):
+
+    try:
+        conn = pool.get_connection()
+        cursor = conn.cursor()
+        
+        query = "SELECT IDTennant, TennantDBNarocila FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
+        cursor.execute(query,(nar.idtennant,))
+        row = cursor.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="DB not found")
+        tennantDB = row[1]
+        
+# start 
+        query = "SELECT IDNarocilo, IDStatus FROM  " + tennantDB + ".Narocilo WHERE IDNarocilo = %s"
+        cursor.execute(query,(nar.idnarocilo,))
+        row = cursor.fetchone()
+        if row is None:
+            return {"Narocilo": "failed"}
+            raise HTTPException(status_code=404, detail="DB not found")
+
+        return {"Narocilo": "passed", "IDNarocilo": row[0], "IDStatus": row[1]} 
+        
+    except Exception as e:
+        print("Error: ", e)
+        return {"Narocilo": "failed", "Error": e}
+    finally:
+        cursor.close()
+        conn.close()  
+    return {"Narocilo": "undefined"}       
     
     
     
