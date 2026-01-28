@@ -836,7 +836,44 @@ def posodobi_status_narocilo(oce: Ocena):
         conn.close()  
     return {"Ocena": "undefined"}    
     
+class Oce007(BaseModel):
+    idposlovalnica: str
+    idtennant: str
+    uniqueid: str
     
+@app.post("/dobioceno/")
+def posodobi_status_narocilo(oce: Oce007):
+
+    try:
+        conn = pool.get_connection()
+        cursor = conn.cursor()
+        
+        query = "SELECT IDTennant, TennantDBNarocila FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
+        cursor.execute(query,(oce.idtennant,))
+        row = cursor.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="DB not found")
+        tennantDB = row[1]
+        
+        sql = "SELECT IDNarocilo, Ocena, Komentar FROM "+tennantDB+".Ocena WHERE IDPoslovalnica = %s"
+        cursor.execute(sql,(oce.idposlovalnica,))
+        rows = cursor.fetchall()
+        if not rows:
+            return {"Ocena": "failed"}
+        else:
+            # Return a list of dictionaries
+            return [
+                {"IDNarocilo": row[0], "Ocena": row[1], "Komentar": row[2]}
+                for row in rows
+            ]
+        
+    except Exception as e:
+        print("Error: ", e)
+        return {"Ocena": "failed", "Error": e}
+    finally:
+        cursor.close()
+        conn.close()  
+    return {"Ocena": "undefined"}    
     
     
     
