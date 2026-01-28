@@ -166,9 +166,9 @@ def get_narocila(nar: Narocilo1):
     if nar.mode == '1':
         nacin = " Zavrnjen IS NULL AND Zakljucen IS NULL AND Potrjen IS NULL"
     elif nar.mode == '2':
-        nacin = " Zavrnjen != 1 AND Potrjen = 1 AND Zakljucen != 1"
+        nacin = " Zavrnjen IS NULL AND Potrjen = 1 AND Zakljucen != 1"
     elif nar.mode == '3':
-        nacin = " Zavrnjen != 1 AND Zakljucen = 1"
+        nacin = " Zavrnjen IS NULL AND Zakljucen = 1"
         
     try:
         with pool.get_connection() as conn:
