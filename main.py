@@ -163,6 +163,7 @@ def get_narocila(nar: Narocilo1):
                     sql = "SELECT IDNarocilo, Cas, Datum, DatumZakljucka, IDStranka, IDPoslovalnica, IDStoritev, IDStatus, StevilkaSasije, IDModel, IDZnamka, IDPonudba FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
+                    print(rows)
                     return [
                         {  
                             "IDNarocilo": row[0],
