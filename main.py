@@ -331,6 +331,12 @@ def get_narocila(nar: Narocilo1):
                     stranke = dobiStranke(idstr,nar.uniqueid)
                     print(stranke)
                     
+                    print("Dobi ocene: ")
+                    sql = "SELECT DISTINCT IDNarocilo FROM "+ tennantDB +".Ocena"
+                    cursor.execute(sql)
+                    rows = cursor.fetchall()
+                    vsebuje = {row[0]: "true" for row in rows}
+                    
                     print("Dobi narocila: ")
                     sql = "SELECT IDNarocilo, Cas, Datum, DatumZakljucka, IDStranka, IDPoslovalnica, IDStoritev, IDStatus, StevilkaSasije, IDModel, IDZnamka, IDPonudba FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
@@ -360,6 +366,7 @@ def get_narocila(nar: Narocilo1):
                             "TelefonStranke": stranke.get(str(row[4]), {}).get("Telefon", str(row[4])) or row[4],
                             "EmailStranke": stranke.get(str(row[4]), {}).get("Email", str(row[4])) or row[4],
                             "DavcnaStranke": stranke.get(str(row[4]), {}).get("DavcnaStevilka", str(row[4])) or row[4],
+                            "ImaOceno": "true" if row[0] in vsebuje else "false"
                         } 
                             for row in rows ]
 
