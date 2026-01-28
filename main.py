@@ -103,6 +103,53 @@ def dodaj_narocilo(narocilo: Narocilo):
     return {"Narocilo": "undefined"}
 
 
+# Zacetek brisanja narocila
+
+class Narocilo(BaseModel):
+    idnarocilo: str
+    idtennant: str
+    uniqueid: str
+
+@app.delete("/deletenarocilo/")
+def brisi_narocilo(nar: Nar):
+
+    try:
+        conn = pool.get_connection()
+        cursor = conn.cursor()
+        
+        query = "SELECT IDTennant, TennantDBNarocila FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
+        cursor.execute(query,(narocilo.idtennant,))
+        row = cursor.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="DB not found")
+        tennantDB = row[1]
+        
+# start 
+        query = "SELECT IDNarocilo FROM  " + tennantDB + ".Narocilo WHERE IDNarocilo = %s AND Potrjen IS NULL"
+        cursor.execute(query,(nar.idnarocilo,))
+        row = cursor.fetchone()
+        if row is None:
+            return {"Narocilo": "failed", "Opis": "Narocilo, ki ga želite izbrisati je že potrjeno!!!"}
+            raise HTTPException(status_code=404, detail="DB not found")
+
+        sql = "DELETE FROM"+tennantDB+".Narocilo WHERE IDNarocilo = %s"
+        cursor.execute(sql,(nar.idnarocilo))
+        # Fixed columns → no need to read cursor.description
+        return {"Narocilo": "passed"}
+
+# end        
+        
+    except Exception as e:
+        print("Error: ", e)
+        return {"Narocilo": "failed", "Error": e}
+    finally:
+        cursor.close()
+        conn.close()  
+    return {"Narocilo": "undefined"}
+
+# Konec brisanja narocila
+
+
 # Zacetek narocila
 
 class Narocilo1(BaseModel):
