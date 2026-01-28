@@ -289,7 +289,7 @@ def get_narocila(nar: Narocilo1):
                     storitve = dobiStoritve(idstor,nar.uniqueid)
                     print(storitve)
                     
-                    sql = "SELECT IDNarocilo, Cas, Datum, DatumZakljucka, IDStranka, IDPoslovalnica, IDStoritev, IDStatus, StevilkaSasije, IDModel, IDZnamka, IDPonudba FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
+                    sql = "SELECT IDNarocilo, Cas, Datum, DatumZakljucka, IDStranka, IDPoslovalnica, IDStoritev, IDStatus, StevilkaSasije, IDModel, IDZnamka, IDPonudba FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
                     print(rows)
