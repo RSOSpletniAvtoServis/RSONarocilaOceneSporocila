@@ -743,7 +743,7 @@ def posodobi_status_narocilo(oce: Oce1):
         if row is None:
             return {"Ocena": "failed"}
         else:
-            return {"Ocena": "passed", "IDNarocilo": row[0], "Ocena": row[1], "Komentar": row[2]}
+            return {"Ocena1": "passed", "IDNarocilo": row[0], "Ocena": row[1], "Komentar": row[2]}
         
     except Exception as e:
         print("Error: ", e)
