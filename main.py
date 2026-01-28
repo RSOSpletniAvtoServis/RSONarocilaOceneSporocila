@@ -581,8 +581,42 @@ def statusnarocila(nar: Nar):
         cursor.close()
         conn.close()  
     return {"Narocilo": "undefined"}       
+
+class Nar007(BaseModel):
+    idnarocilo: str
+    idstatus: str
+    idtennant: str
+    uniqueid: str
     
-    
+@app.put("/posodobistatusnarocila/")
+def posodobi_status_narocilo(nar: Nar007):
+
+    try:
+        conn = pool.get_connection()
+        cursor = conn.cursor()
+        
+        query = "SELECT IDTennant, TennantDBNarocila FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
+        cursor.execute(query,(nar.idtennant,))
+        row = cursor.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="DB not found")
+        tennantDB = row[1]
+        
+# start 
+        sql = "UPDATE "+tennantDB+".Narocilo SET IDStatus = %s WHERE IDNarocilo = %s"
+        cursor.execute(sql,(nar.idstatus,nar.idnarocilo,))
+        # Fixed columns → no need to read cursor.description
+        return {"Narocilo": "passed"}
+
+# end        
+        
+    except Exception as e:
+        print("Error: ", e)
+        return {"Narocilo": "failed", "Error": e}
+    finally:
+        cursor.close()
+        conn.close()  
+    return {"Narocilo": "undefined"}       
     
     
     
