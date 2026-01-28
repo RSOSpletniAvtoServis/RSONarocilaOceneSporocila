@@ -401,7 +401,7 @@ def dobiStranko(iduporabnik,uniqueid):
 def dobiZaposlenega(iduporabnik,idtennant,uniqueid):
     try:
         data = {"iduporabnik": iduporabnik, "idtennant": idtennant, "uniqueid": uniqueid}
-        response = requests.post(f"{SERVICE_POSZAP}/zaposlen1/", json=data, timeout=5)
+        response = requests.post(f"{SERVICE_POSZAP_URL}/zaposlen1/", json=data, timeout=5)
         #response.raise_for_status()  # Raise exception for HTTP errors  
         print(response)
         if "application/json" not in response.headers.get("Content-Type", ""):
