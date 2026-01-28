@@ -753,7 +753,33 @@ def posodobi_status_narocilo(oce: Oce1):
         conn.close()  
     return {"Ocena": "undefined"}
     
+
     
+@app.put("/popravioceno/")
+def posodobi_status_narocilo(oce: Ocena):
+
+    try:
+        conn = pool.get_connection()
+        cursor = conn.cursor()
+        
+        query = "SELECT IDTennant, TennantDBNarocila FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
+        cursor.execute(query,(oce.idtennant,))
+        row = cursor.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="DB not found")
+        tennantDB = row[1]
+        
+        sql = "UPDATE "+tennantDB+".Ocena SET Ocena = %s, Komentar = %s WHERE IDNarocilo = %s"
+        cursor.execute(sql,(oce.ocena,oce.komentar,oce.idnarocilo,))
+        return {"Ocena": "passed"}
+        
+    except Exception as e:
+        print("Error: ", e)
+        return {"Ocena": "failed", "Error": e}
+    finally:
+        cursor.close()
+        conn.close()  
+    return {"Ocena": "undefined"}    
     
     
     
