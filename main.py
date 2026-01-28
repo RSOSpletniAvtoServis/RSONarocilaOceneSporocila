@@ -118,7 +118,7 @@ def brisi_narocilo(nar: Nar):
         cursor = conn.cursor()
         
         query = "SELECT IDTennant, TennantDBNarocila FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
-        cursor.execute(query,(narocilo.idtennant,))
+        cursor.execute(query,(nar.idtennant,))
         row = cursor.fetchone()
         if row is None:
             raise HTTPException(status_code=404, detail="DB not found")
