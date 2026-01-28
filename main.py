@@ -133,7 +133,7 @@ def brisi_narocilo(nar: Nar):
             raise HTTPException(status_code=404, detail="DB not found")
 
         sql = "DELETE FROM"+tennantDB+".Narocilo WHERE IDNarocilo = %s"
-        cursor.execute(sql,(nar.idnarocilo))
+        cursor.execute(sql,(nar.idnarocilo,))
         # Fixed columns → no need to read cursor.description
         return {"Narocilo": "passed"}
 
