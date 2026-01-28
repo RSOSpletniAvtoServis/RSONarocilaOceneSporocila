@@ -214,6 +214,10 @@ def get_narocila(nar: Narocilo1):
                     print(idstat)
                     statusi = dobiStatuse(idstat,nar.uniqueid)
                     print(statusi)
+                    sql = "SELECT DISTINCT IDNarocilo FROM "+ tennantDB +".Ocena"
+                    cursor.execute(sql)
+                    rows = cursor.fetchall()
+                    vsebuje = {row[0]: "true" for row in rows}
                     
                     sql = "SELECT IDNarocilo, Cas, Datum, DatumZakljucka, IDStranka, IDPoslovalnica, IDStoritev, IDStatus, StevilkaSasije, IDModel, IDZnamka, IDPonudba FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
@@ -237,7 +241,8 @@ def get_narocila(nar: Narocilo1):
                             "NazivModel": vozila.get(str(row[8]), {}).get("NazivModel", str(row[8])) or row[9],
                             "NazivPoslovalnice": poslovalnice.get(str(row[5]), {}).get("NazivPoslovalnice", str(row[5])) or row[5],
                             "NazivStoritve": storitve.get(str(row[6]), {}) or row[6],
-                            "NazivStatusa": statusi.get(str(row[7]), {}) or row[7]
+                            "NazivStatusa": statusi.get(str(row[7]), {}) or row[7],
+                            "ImaOceno": "true" if row[0] in vsebuje else "false"
                         } 
                             for row in rows ]
 
