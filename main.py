@@ -207,6 +207,14 @@ def get_narocila(nar: Narocilo1):
                     storitve = dobiStoritve(idstor,nar.uniqueid)
                     print(storitve)
                     
+                    sql = "SELECT DISTINCT IDStatus FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
+                    cursor.execute(sql,(idstranka,))
+                    rows = cursor.fetchall()
+                    idstat = list({ row[0] for row in rows if row[0] is not None })
+                    print(statusi)
+                    statusi = dobiStatuse(idstat,nar.uniqueid)
+                    print(statusi)
+                    
                     sql = "SELECT IDNarocilo, Cas, Datum, DatumZakljucka, IDStranka, IDPoslovalnica, IDStoritev, IDStatus, StevilkaSasije, IDModel, IDZnamka, IDPonudba FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
@@ -228,7 +236,8 @@ def get_narocila(nar: Narocilo1):
                             "NazivZnamke": vozila.get(row[8], {}).get("NazivZnamke", row[8]) or row[10],
                             "NazivModel": vozila.get(str(row[8]), {}).get("NazivModel", str(row[8])) or row[9],
                             "NazivPoslovalnice": poslovalnice.get(str(row[5]), {}).get("NazivPoslovalnice", str(row[5])) or row[5],
-                            "NazivStoritve": storitve.get(str(row[6]), {}) or row[6]
+                            "NazivStoritve": storitve.get(str(row[6]), {}) or row[6],
+                            "NazivStatusa": statudsi.get(str(row[7]), {}) or row[7]
                         } 
                             for row in rows ]
 
@@ -340,6 +349,24 @@ def dobiStoritve(idstor,uniqueid):
         print("Prislo je do napake: ", e)
         return {"Status": "failed", "Error": e}
     return {"Status": "failed"}
+    
+    
+def dobiStatuse(idstat,uniqueid):
+    try:
+        data = {"ids": idstat,"uniqueid": uniqueid}
+        response = requests.post(f"{SERVICE_ADMVOZ_URL}/izbranistatusi/", json=data, timeout=5)
+        #response.raise_for_status()  # Raise exception for HTTP errors  
+        print(response)
+        if "application/json" not in response.headers.get("Content-Type", ""):
+            return {"Status": "failed"}
+        else:
+            result = response.json()
+            print(result)
+            return result
+    except Exception as e:
+        print("Prislo je do napake: ", e)
+        return {"Status": "failed", "Error": e}
+    return {"Status": "failed"}    
 
 
 def dobiPoslovalnice(idpos,idtennant,uniqueid):
