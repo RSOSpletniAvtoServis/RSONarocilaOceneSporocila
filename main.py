@@ -105,7 +105,7 @@ def dodaj_narocilo(narocilo: Narocilo):
 
 # Zacetek brisanja narocila
 
-class Narocilo(BaseModel):
+class Nar(BaseModel):
     idnarocilo: str
     idtennant: str
     uniqueid: str
