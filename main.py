@@ -211,7 +211,7 @@ def get_narocila(nar: Narocilo1):
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
                     idstat = list({ row[0] for row in rows if row[0] is not None })
-                    print(statusi)
+                    print(idstat)
                     statusi = dobiStatuse(idstat,nar.uniqueid)
                     print(statusi)
                     
