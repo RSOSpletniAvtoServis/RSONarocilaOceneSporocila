@@ -680,7 +680,7 @@ def posodobi_status_narocilo(oce: Ocena):
         sql = "SELECT IDNarocilo, IDStranka, IDPoslovalnica, IDStoritev FROM "+tennantDB+".Ocena WHERE IDNarocilo = %s"
         cursor.execute(sql,(oce.idnarocilo,))
         row = cursor.fetchone()
-        if row is Not None:
+        if row is None:
             ena = 1
         else:
             return {"Ocena": "failed", "Opis": "Ocena za ta servis že obstaja"}
