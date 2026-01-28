@@ -654,7 +654,55 @@ def posodobi_status_narocilo(nar: Nar007):
         conn.close()  
     return {"Narocilo": "undefined"}       
     
+# Zacetek dodajanja ocene
+
+class Ocena(BaseModel):
+    ocena: str
+    komentar: str
+    idnarocilo: str
+    idtennant: str
+    uniqueid: str
     
+@app.post("/podajoceno/")
+def posodobi_status_narocilo(oce: Ocena):
+
+    try:
+        conn = pool.get_connection()
+        cursor = conn.cursor()
+        
+        query = "SELECT IDTennant, TennantDBNarocila FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
+        cursor.execute(query,(oce.idtennant,))
+        row = cursor.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="DB not found")
+        tennantDB = row[1]
+        
+        sql = "SELECT IDNarocilo, IDStranka, IDPoslovalnica, IDStoritev FROM "+tennantDB+".Narocilo WHERE IDNarocilo = %s"
+        cursor.execute(query,(oce.idnarocilo,))
+        row = cursor.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="DB not found")
+        idstranka = row[1]
+        idposlovalnica = row[2]
+        idstoritev = row[3]
+        
+# start 
+        sql = "INSERT INTO "+tennantDB+".Ocena(Ocena,Komentar,IDNarocilo,IDStranka,IDPoslovalnica,IDStoritev) VALUES (%s,%s,%s,%s,%s,%s)"
+        cursor.execute(sql,(oce.ocena,oce.komentar,oce.idnarocilo,idstranka,idposlovalnica,idstoritev))
+        # Fixed columns → no need to read cursor.description
+        return {"Ocena": "passed"}
+
+# end        
+        
+    except Exception as e:
+        print("Error: ", e)
+        return {"Ocena": "failed", "Error": e}
+    finally:
+        cursor.close()
+        conn.close()  
+    return {"Ocena": "undefined"} 
+
+# Konec dodajanja ocene    
     
     
     
