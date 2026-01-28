@@ -316,8 +316,8 @@ def get_narocila(nar: Narocilo1):
                     rows = cursor.fetchall()
                     idstr = list({ row[0] for row in rows if row[0] is not None })
                     print(idstr)
-                    statusi = dobiStranke(idstr,nar.uniqueid)
-                    print(statusi)
+                    stranke = dobiStranke(idstr,nar.uniqueid)
+                    print(stranke)
                     
                     
                     sql = "SELECT IDNarocilo, Cas, Datum, DatumZakljucka, IDStranka, IDPoslovalnica, IDStoritev, IDStatus, StevilkaSasije, IDModel, IDZnamka, IDPonudba FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
@@ -343,11 +343,11 @@ def get_narocila(nar: Narocilo1):
                             "NazivPoslovalnice": poslovalnice.get(str(row[5]), {}).get("NazivPoslovalnice", str(row[5])) or row[5],
                             "NazivStoritve": storitve.get(str(row[6]), {}) or row[6],
                             "NazivStatusa": statusi.get(str(row[7]), {}) or row[7],
-                            "ImeStranke": poslovalnice.get(str(row[4]), {}).get("Ime", str(row[4])) or row[4],
-                            "PriimekStranke": poslovalnice.get(str(row[4]), {}).get("Priimek", str(row[4])) or row[4],
-                            "TelefonStranke": poslovalnice.get(str(row[4]), {}).get("Telefon", str(row[4])) or row[4],
-                            "EmailStranke": poslovalnice.get(str(row[4]), {}).get("Email", str(row[4])) or row[4],
-                            "DavcnaStranke": poslovalnice.get(str(row[4]), {}).get("DavcnaStevilka", str(row[4])) or row[4],
+                            "ImeStranke": stranke.get(str(row[4]), {}).get("Ime", str(row[4])) or row[4],
+                            "PriimekStranke": stranke.get(str(row[4]), {}).get("Priimek", str(row[4])) or row[4],
+                            "TelefonStranke": stranke.get(str(row[4]), {}).get("Telefon", str(row[4])) or row[4],
+                            "EmailStranke": stranke.get(str(row[4]), {}).get("Email", str(row[4])) or row[4],
+                            "DavcnaStranke": stranke.get(str(row[4]), {}).get("DavcnaStevilka", str(row[4])) or row[4],
                         } 
                             for row in rows ]
 
@@ -509,10 +509,7 @@ def dobiStranke(idstr,uniqueid):
     
     
     
-if isinstance(my_var, dict):
-    print("This is a dictionary")
-else:
-    print("Not a dictionary")
+
     
 #Konec narocilo
     
