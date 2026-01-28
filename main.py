@@ -271,7 +271,7 @@ def get_narocila(nar: Narocilo1):
                     rows = cursor.fetchall()
                     sasije = list({ row[0] for row in rows if row[0] is not None })
                     print(sasije)
-                    vozila = dobiVozila(sasije,nar.iduporabnik,nar.uniqueid)
+                    vozila = dobiVozila1(sasije,nar.uniqueid)
                     
                     sql = "SELECT DISTINCT IDPoslovalnica FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
@@ -377,6 +377,23 @@ def dobiVozila(stsas,iduporabnik,uniqueid):
         print("Prislo je do napake: ", e)
         return {"Status": "failed", "Error": e}
     return {"Status": "failed"}
+    
+def dobiVozila1(stsas,uniqueid):
+    try:
+        data = {"stsas": stsas, "uniqueid": uniqueid}
+        response = requests.post(f"{SERVICE_ADMVOZ_URL}/izbranavozila1/", json=data, timeout=5)
+        #response.raise_for_status()  # Raise exception for HTTP errors  
+        print(response)
+        if "application/json" not in response.headers.get("Content-Type", ""):
+            return {"Status": "failed"}
+        else:
+            result = response.json()
+            print(result)
+            return result
+    except Exception as e:
+        print("Prislo je do napake: ", e)
+        return {"Status": "failed", "Error": e}
+    return {"Status": "failed"}    
 
 def dobiStranko(iduporabnik,uniqueid):
     try:
@@ -418,4 +435,136 @@ def dobiZaposlenega(iduporabnik,idtennant,uniqueid):
     return {"Narocilo": "failed"}
     
 #Konec narocilo
+    
+@app.put("/zavrninarocilo/")
+def zavrni_narocilo(nar: Nar):
+
+    try:
+        conn = pool.get_connection()
+        cursor = conn.cursor()
+        
+        query = "SELECT IDTennant, TennantDBNarocila FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
+        cursor.execute(query,(nar.idtennant,))
+        row = cursor.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="DB not found")
+        tennantDB = row[1]
+        
+# start 
+        query = "SELECT IDNarocilo FROM  " + tennantDB + ".Narocilo WHERE IDNarocilo = %s AND Potrjen IS NULL"
+        cursor.execute(query,(nar.idnarocilo,))
+        row = cursor.fetchone()
+        if row is None:
+            return {"Narocilo": "failed", "Opis": "Narocilo, ki ga želite zavrniti je že potrjeno!!!"}
+            raise HTTPException(status_code=404, detail="DB not found")
+
+        sql = "UPDATE "+tennantDB+".Narocilo SET Zavrnjen = 1 WHERE IDNarocilo = %s"
+        cursor.execute(sql,(nar.idnarocilo,))
+        # Fixed columns → no need to read cursor.description
+        return {"Narocilo": "passed"}
+
+# end        
+        
+    except Exception as e:
+        print("Error: ", e)
+        return {"Narocilo": "failed", "Error": e}
+    finally:
+        cursor.close()
+        conn.close()  
+    return {"Narocilo": "undefined"}
+    
+    
+@app.put("/potrdinarocilo/")
+def potrdi_narocilo(nar: Nar):
+
+    try:
+        conn = pool.get_connection()
+        cursor = conn.cursor()
+        
+        query = "SELECT IDTennant, TennantDBNarocila FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
+        cursor.execute(query,(nar.idtennant,))
+        row = cursor.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="DB not found")
+        tennantDB = row[1]
+        
+# start 
+        query = "SELECT IDNarocilo FROM  " + tennantDB + ".Narocilo WHERE IDNarocilo = %s AND Zavrnjen IS NULL"
+        cursor.execute(query,(nar.idnarocilo,))
+        row = cursor.fetchone()
+        if row is None:
+            return {"Narocilo": "failed", "Opis": "Narocilo, ki ga želite potrditi je že zavrnjeno!!!"}
+            raise HTTPException(status_code=404, detail="DB not found")
+
+        sql = "UPDATE "+tennantDB+".Narocilo SET Potrjen = 1 WHERE IDNarocilo = %s"
+        cursor.execute(sql,(nar.idnarocilo,))
+        # Fixed columns → no need to read cursor.description
+        return {"Narocilo": "passed"}
+
+# end        
+        
+    except Exception as e:
+        print("Error: ", e)
+        return {"Narocilo": "failed", "Error": e}
+    finally:
+        cursor.close()
+        conn.close()  
+    return {"Narocilo": "undefined"}    
+    
+@app.put("/zakljucinarocilo/")
+def zakljuci_narocilo(nar: Nar):
+
+    try:
+        conn = pool.get_connection()
+        cursor = conn.cursor()
+        
+        query = "SELECT IDTennant, TennantDBNarocila FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
+        cursor.execute(query,(nar.idtennant,))
+        row = cursor.fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="DB not found")
+        tennantDB = row[1]
+        
+# start 
+        query = "SELECT IDNarocilo FROM  " + tennantDB + ".Narocilo WHERE IDNarocilo = %s AND Potrjen = 1"
+        cursor.execute(query,(nar.idnarocilo,))
+        row = cursor.fetchone()
+        if row is None:
+            return {"Narocilo": "failed", "Opis": "Narocilo, ki ga želite zakljuciti še ni potrjeno!!!"}
+            raise HTTPException(status_code=404, detail="DB not found")
+
+        sql = "UPDATE "+tennantDB+".Narocilo SET Zakljucen = 1 WHERE IDNarocilo = %s"
+        cursor.execute(sql,(nar.idnarocilo,))
+        # Fixed columns → no need to read cursor.description
+        return {"Narocilo": "passed"}
+
+# end        
+        
+    except Exception as e:
+        print("Error: ", e)
+        return {"Narocilo": "failed", "Error": e}
+    finally:
+        cursor.close()
+        conn.close()  
+    return {"Narocilo": "undefined"}     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
