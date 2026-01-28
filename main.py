@@ -303,13 +303,22 @@ def get_narocila(nar: Narocilo1):
                     storitve = dobiStoritve(idstor,nar.uniqueid)
                     print(storitve)
                     
-                    sql = "SELECT DISTINCT IDStatus FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
+                    sql = "SELECT DISTINCT IDStatus FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
                     idstat = list({ row[0] for row in rows if row[0] is not None })
                     print(idstat)
                     statusi = dobiStatuse(idstat,nar.uniqueid)
                     print(statusi)
+                    
+                    sql = "SELECT DISTINCT IDStranka FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
+                    cursor.execute(sql,(idstranka,))
+                    rows = cursor.fetchall()
+                    idstr = list({ row[0] for row in rows if row[0] is not None })
+                    print(idstr)
+                    statusi = dobiStranke(idstr,nar.uniqueid)
+                    print(statusi)
+                    
                     
                     sql = "SELECT IDNarocilo, Cas, Datum, DatumZakljucka, IDStranka, IDPoslovalnica, IDStoritev, IDStatus, StevilkaSasije, IDModel, IDZnamka, IDPonudba FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
@@ -333,7 +342,12 @@ def get_narocila(nar: Narocilo1):
                             "NazivModel": vozila.get(str(row[8]), {}).get("NazivModel", str(row[8])) or row[9],
                             "NazivPoslovalnice": poslovalnice.get(str(row[5]), {}).get("NazivPoslovalnice", str(row[5])) or row[5],
                             "NazivStoritve": storitve.get(str(row[6]), {}) or row[6],
-                            "NazivStatusa": statusi.get(str(row[7]), {}) or row[7]
+                            "NazivStatusa": statusi.get(str(row[7]), {}) or row[7],
+                            "ImeStranke": poslovalnice.get(str(row[4]), {}).get("Ime", str(row[4])) or row[4],
+                            "PriimekStranke": poslovalnice.get(str(row[4]), {}).get("Priimek", str(row[4])) or row[4],
+                            "TelefonStranke": poslovalnice.get(str(row[4]), {}).get("Telefon", str(row[4])) or row[4],
+                            "EmailStranke": poslovalnice.get(str(row[4]), {}).get("Email", str(row[4])) or row[4],
+                            "DavcnaStranke": poslovalnice.get(str(row[4]), {}).get("DavcnaStevilka", str(row[4])) or row[4],
                         } 
                             for row in rows ]
 
@@ -474,6 +488,31 @@ def dobiZaposlenega(iduporabnik,idtennant,uniqueid):
         print("Prislo je do napake: ", e)
         return {"Narocilo": "failed", "Error": e}
     return {"Narocilo": "failed"}
+    
+    
+def dobiStranke(idstr,uniqueid):
+    try:
+        data = {"ids": idstr, "uniqueid": uniqueid}
+        response = requests.post(f"{SERVICE_UPOPRI_URL}/izbranestranke/", json=data, timeout=5)
+        #response.raise_for_status()  # Raise exception for HTTP errors  
+        print(response)
+        if "application/json" not in response.headers.get("Content-Type", ""):
+            return {"Stranka": "failed"}
+        else:
+            result = response.json()
+            print(result)
+            return result
+    except Exception as e:
+        print("Prislo je do napake: ", e)
+        return {"Stranka": "failed", "Error": e}
+    return {"Stranka": "failed"}   
+    
+    
+    
+if isinstance(my_var, dict):
+    print("This is a dictionary")
+else:
+    print("Not a dictionary")
     
 #Konec narocilo
     
