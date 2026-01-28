@@ -160,7 +160,7 @@ class Narocilo1(BaseModel):
 
 
 @app.post("/narocilastranka/")
-def get_narocila(nar: Narocilo1):
+def get_narocilastranka(nar: Narocilo1):
     userid = nar.uniqueid
     nacin = ""
     if nar.mode == '1':
@@ -262,7 +262,7 @@ def get_narocila(nar: Narocilo1):
 
 
 @app.post("/narocilaposlovalnica/")
-def get_narocila(nar: Narocilo1):
+def get_narocilaposlovalnica(nar: Narocilo1):
     userid = nar.uniqueid
     nacin = ""
     if nar.mode == '1':
@@ -724,7 +724,7 @@ class Ocena(BaseModel):
     uniqueid: str
     
 @app.post("/podajoceno/")
-def posodobi_status_narocilo(oce: Ocena):
+def podaj_oceno(oce: Ocena):
 
     try:
         conn = pool.get_connection()
@@ -811,7 +811,7 @@ def dobi_oceno(oce: Oce1):
 
     
 @app.put("/popravioceno/")
-def posodobi_status_narocilo(oce: Ocena):
+def popravi_oceno(oce: Ocena):
 
     try:
         conn = pool.get_connection()
