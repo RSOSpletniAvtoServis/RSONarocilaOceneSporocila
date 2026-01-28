@@ -411,7 +411,7 @@ def dobiZaposlenega(iduporabnik,idtennant,uniqueid):
             idposlovalnica = result["IDPoslovalnica"]
             print(idposlovalnica)
             print(result)
-            return {"Narocilo": "passed", "IDPoslovalnica": idstranka}
+            return {"Narocilo": "passed", "IDPoslovalnica": idposlovalnica}
     except Exception as e:
         print("Prislo je do napake: ", e)
         return {"Narocilo": "failed", "Error": e}
