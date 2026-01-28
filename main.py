@@ -180,10 +180,11 @@ def get_narocila(nar: Narocilo1):
                 if row is None:
                     raise HTTPException(status_code=404, detail="DB not found")
                 tennantDB = row[1]
+                print("DobiStranko:")
                 stranka1 = dobiStranko(nar.iduporabnik,nar.uniqueid)
                 if stranka1["Narocilo"] == "passed":
                     idstranka = stranka1["IDStranka"]
-                    
+                    print("Dobi vozila:")
                     sql = "SELECT DISTINCT StevilkaSasije FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
@@ -191,6 +192,7 @@ def get_narocila(nar: Narocilo1):
                     print(sasije)
                     vozila = dobiVozila(sasije,nar.iduporabnik,nar.uniqueid)
                     
+                    print("Dobi poslovalnice:")
                     sql = "SELECT DISTINCT IDPoslovalnica FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
@@ -199,6 +201,7 @@ def get_narocila(nar: Narocilo1):
                     poslovalnice = dobiPoslovalnice(idpos,nar.idtennant,nar.uniqueid)
                     print(poslovalnice)
                     
+                    print("Dobi storitve:")
                     sql = "SELECT DISTINCT IDStoritev FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
@@ -207,6 +210,7 @@ def get_narocila(nar: Narocilo1):
                     storitve = dobiStoritve(idstor,nar.uniqueid)
                     print(storitve)
                     
+                    print("Dobi statuse: ")
                     sql = "SELECT DISTINCT IDStatus FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
@@ -214,11 +218,13 @@ def get_narocila(nar: Narocilo1):
                     print(idstat)
                     statusi = dobiStatuse(idstat,nar.uniqueid)
                     print(statusi)
+                    print("Dobi ocene: ")
                     sql = "SELECT DISTINCT IDNarocilo FROM "+ tennantDB +".Ocena"
                     cursor.execute(sql)
                     rows = cursor.fetchall()
                     vsebuje = {row[0]: "true" for row in rows}
                     
+                    print("Dobi narocilo: ")
                     sql = "SELECT IDNarocilo, Cas, Datum, DatumZakljucka, IDStranka, IDPoslovalnica, IDStoritev, IDStatus, StevilkaSasije, IDModel, IDZnamka, IDPonudba FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
@@ -276,10 +282,12 @@ def get_narocila(nar: Narocilo1):
                 if row is None:
                     raise HTTPException(status_code=404, detail="DB not found")
                 tennantDB = row[1]
+                print("Dobi zaposlenega: ")
                 zaposleni1 = dobiZaposlenega(nar.iduporabnik,nar.idtennant,nar.uniqueid)
                 if zaposleni1["Narocilo"] == "passed":
                     idstranka = zaposleni1["IDPoslovalnica"]
                     
+                    print("Dobi vozila: ")
                     sql = "SELECT DISTINCT StevilkaSasije FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
@@ -287,6 +295,7 @@ def get_narocila(nar: Narocilo1):
                     print(sasije)
                     vozila = dobiVozila1(sasije,nar.uniqueid)
                     
+                    print("Dobi poslovalnice: ")
                     sql = "SELECT DISTINCT IDPoslovalnica FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
@@ -295,6 +304,7 @@ def get_narocila(nar: Narocilo1):
                     poslovalnice = dobiPoslovalnice(idpos,nar.idtennant,nar.uniqueid)
                     print(poslovalnice)
                     
+                    print("Dobi storitve: ")
                     sql = "SELECT DISTINCT IDStoritev FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
@@ -303,6 +313,7 @@ def get_narocila(nar: Narocilo1):
                     storitve = dobiStoritve(idstor,nar.uniqueid)
                     print(storitve)
                     
+                    print("Dobi statuse: ")
                     sql = "SELECT DISTINCT IDStatus FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
@@ -311,6 +322,7 @@ def get_narocila(nar: Narocilo1):
                     statusi = dobiStatuse(idstat,nar.uniqueid)
                     print(statusi)
                     
+                    print("Dobi stranke: ")
                     sql = "SELECT DISTINCT IDStranka FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
@@ -319,7 +331,7 @@ def get_narocila(nar: Narocilo1):
                     stranke = dobiStranke(idstr,nar.uniqueid)
                     print(stranke)
                     
-                    
+                    print("Dobi narocila: ")
                     sql = "SELECT IDNarocilo, Cas, Datum, DatumZakljucka, IDStranka, IDPoslovalnica, IDStoritev, IDStatus, StevilkaSasije, IDModel, IDZnamka, IDPonudba FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
                     cursor.execute(sql,(idstranka,))
                     rows = cursor.fetchall()
