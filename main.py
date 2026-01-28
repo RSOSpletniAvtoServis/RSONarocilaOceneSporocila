@@ -240,6 +240,88 @@ def get_narocila(nar: Narocilo1):
 
 
 
+
+@app.post("/narocilaposlovalnica/")
+def get_narocila(nar: Narocilo1):
+    userid = nar.uniqueid
+    nacin = ""
+    if nar.mode == '1':
+        nacin = " Zavrnjen IS NULL AND Zakljucen IS NULL AND Potrjen IS NULL"
+    elif nar.mode == '2':
+        nacin = " Zavrnjen IS NULL AND Potrjen = 1 AND Zakljucen IS NULL"
+    elif nar.mode == '3':
+        nacin = " Zavrnjen IS NULL AND Zakljucen = 1"
+        
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                # get tennant db
+                query = "SELECT IDTennant, TennantDBNarocila FROM  " + adminbaza + ".TennantLookup WHERE IDTennant = %s"
+                cursor.execute(query,(nar.idtennant,))
+                row = cursor.fetchone()
+                if row is None:
+                    raise HTTPException(status_code=404, detail="DB not found")
+                tennantDB = row[1]
+                zaposleni1 = dobiZaposlenega(nar.iduporabnik,nar.idtennant,nar.uniqueid)
+                if zaposleni1["Narocilo"] == "passed":
+                    idstranka = zaposleni1["IDPoslovalnica"]
+                    
+                    sql = "SELECT DISTINCT StevilkaSasije FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
+                    cursor.execute(sql,(idstranka,))
+                    rows = cursor.fetchall()
+                    sasije = list({ row[0] for row in rows if row[0] is not None })
+                    print(sasije)
+                    vozila = dobiVozila(sasije,nar.iduporabnik,nar.uniqueid)
+                    
+                    sql = "SELECT DISTINCT IDPoslovalnica FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
+                    cursor.execute(sql,(idstranka,))
+                    rows = cursor.fetchall()
+                    idpos = list({ row[0] for row in rows if row[0] is not None })
+                    print(idpos)
+                    poslovalnice = dobiPoslovalnice(idpos,nar.idtennant,nar.uniqueid)
+                    print(poslovalnice)
+                    
+                    sql = "SELECT DISTINCT IDStoritev FROM "+ tennantDB +".Narocilo WHERE IDPoslovalnica = %s AND " + nacin
+                    cursor.execute(sql,(idstranka,))
+                    rows = cursor.fetchall()
+                    idstor = list({ row[0] for row in rows if row[0] is not None })
+                    print(idstor)
+                    storitve = dobiStoritve(idstor,nar.uniqueid)
+                    print(storitve)
+                    
+                    sql = "SELECT IDNarocilo, Cas, Datum, DatumZakljucka, IDStranka, IDPoslovalnica, IDStoritev, IDStatus, StevilkaSasije, IDModel, IDZnamka, IDPonudba FROM "+ tennantDB +".Narocilo WHERE IDStranka = %s AND " + nacin
+                    cursor.execute(sql,(idstranka,))
+                    rows = cursor.fetchall()
+                    print(rows)
+                    return [
+                        {  
+                            "IDNarocilo": row[0],
+                            "Cas": row[1],
+                            "Datum": row[2],
+                            "DatumZakljucka": row[3],
+                            "IDStranka": row[4],
+                            "IDPoslovalnica": row[5],
+                            "IDStoritev": row[6],
+                            "IDStatus": row[7],
+                            "StevilkaSasije": row[8],
+                            "IDModel": row[9],
+                            "IDZnamka": row[10],
+                            "IDPonudba": row[11],
+                            "NazivZnamke": vozila.get(row[8], {}).get("NazivZnamke", row[8]) or row[10],
+                            "NazivModel": vozila.get(str(row[8]), {}).get("NazivModel", str(row[8])) or row[9],
+                            "NazivPoslovalnice": poslovalnice.get(str(row[5]), {}).get("NazivPoslovalnice", str(row[5])) or row[5],
+                            "NazivStoritve": storitve.get(str(row[6]), {}) or row[6]
+                        } 
+                            for row in rows ]
+
+                
+    except Exception as e:
+        print("DB error:", e)
+        #raise HTTPException(status_code=500, detail="Database error")
+    return {"Narocilo": "failed"} 
+
+
+
 # Konec narocila
 
 def dobiStoritve(idstor,uniqueid):
@@ -314,5 +396,26 @@ def dobiStranko(iduporabnik,uniqueid):
         print("Prislo je do napake: ", e)
         return {"Narocilo": "failed", "Error": e}
     return {"Narocilo": "failed"}
+    
+    
+def dobiZaposlenega(iduporabnik,idtennant,uniqueid):
+    try:
+        data = {"iduporabnik": iduporabnik, "idtennant": idtennant, "uniqueid": uniqueid}
+        response = requests.post(f"{SERVICE_POSZAP}/zaposlen1/", json=data, timeout=5)
+        #response.raise_for_status()  # Raise exception for HTTP errors  
+        print(response)
+        if "application/json" not in response.headers.get("Content-Type", ""):
+            return {"Narocilo": "failed"}
+        else:
+            result = response.json()
+            idposlovalnica = result["IDPoslovalnica"]
+            print(idposlovalnica)
+            print(result)
+            return {"Narocilo": "passed", "IDPoslovalnica": idstranka}
+    except Exception as e:
+        print("Prislo je do napake: ", e)
+        return {"Narocilo": "failed", "Error": e}
+    return {"Narocilo": "failed"}
+    
 #Konec narocilo
     
