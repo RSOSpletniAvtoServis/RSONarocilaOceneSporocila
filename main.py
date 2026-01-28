@@ -678,7 +678,7 @@ def posodobi_status_narocilo(oce: Ocena):
         tennantDB = row[1]
         print(tennantDB)
         sql = "SELECT IDNarocilo, IDStranka, IDPoslovalnica, IDStoritev FROM "+tennantDB+".Narocilo WHERE IDNarocilo = %s"
-        cursor.execute(query,(oce.idnarocilo,))
+        cursor.execute(sql,(oce.idnarocilo,))
         row = cursor.fetchone()
         if row is None:
             raise HTTPException(status_code=404, detail="DB not found")
