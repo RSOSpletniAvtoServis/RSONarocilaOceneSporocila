@@ -779,7 +779,7 @@ class Oce1(BaseModel):
     uniqueid: str
     
 @app.post("/dobioceno/")
-def posodobi_status_narocilo(oce: Oce1):
+def dobi_oceno(oce: Oce1):
 
     try:
         conn = pool.get_connection()
@@ -837,12 +837,12 @@ def posodobi_status_narocilo(oce: Ocena):
     return {"Ocena": "undefined"}    
     
 class Oce007(BaseModel):
-    idposlovalnica: str
+    iduporabnik: str
     idtennant: str
     uniqueid: str
     
-@app.post("/dobioceno/")
-def posodobi_status_narocilo(oce: Oce007):
+@app.post("/dobiocene/")
+def dobi_ocene(oce: Oce007):
 
     try:
         conn = pool.get_connection()
@@ -855,8 +855,12 @@ def posodobi_status_narocilo(oce: Oce007):
             raise HTTPException(status_code=404, detail="DB not found")
         tennantDB = row[1]
         
+        zaposleni = dobiZaposlenega(oce.iduporabnik,oce.idtennant,oce.uniqueid)
+        if zaposleni["Narocilo"] == "failed":
+            return {"Ocena": "failed"}
+        
         sql = "SELECT IDNarocilo, Ocena, Komentar FROM "+tennantDB+".Ocena WHERE IDPoslovalnica = %s"
-        cursor.execute(sql,(oce.idposlovalnica,))
+        cursor.execute(sql,(zaposleni["IDPoslovalnica"],))
         rows = cursor.fetchall()
         if not rows:
             return {"Ocena": "failed"}
