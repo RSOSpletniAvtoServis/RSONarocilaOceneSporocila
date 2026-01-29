@@ -879,7 +879,9 @@ def dobi_ocene(oce: Oce007):
         conn.close()  
     return {"Ocena": "undefined"}    
     
-    
+@app.get("/health")
+async def health():
+    return {"status": "ok"}    
     
     
     
