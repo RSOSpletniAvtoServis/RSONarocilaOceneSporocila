@@ -23,7 +23,7 @@ def validate_identifier(name: str) -> str:
     return name
 
 
-app = FastAPI()
+app = FastAPI(root_path="/narspo")
 
 try:
     pool = mysql.connector.pooling.MySQLConnectionPool(
