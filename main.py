@@ -879,10 +879,42 @@ def dobi_ocene(oce: Oce007):
         conn.close()  
     return {"Ocena": "undefined"}    
 
+
+# checking other services in kubernetes:
+
+def preveriStatusStoritve(naslov):
+    try:
+        response = requests.get(f"{naslov}/", timeout=5)
+        #response.raise_for_status()  # Raise exception for HTTP errors  
+        print(response)
+        if "application/json" not in response.headers.get("Content-Type", ""):
+            return {"Mikrostoritev": "failed"}
+        else:
+            result = response.json()
+            print(result)
+            return result
+    except Exception as e:
+        print("Prislo je do napake: ", e)
+        return {"Stranka": "failed", "Error": e}
+    return {"Mikrostoritev": "failed"}  
+
+@app.get("/mikroup")
+def mikroupo():
+    return preveriStatusStoritve(SERVICE_UPOPRI_URL)
+
+@app.get("/mikroadm")
+def mikroadm():
+    return preveriStatusStoritve(SERVICE_ADMVOZ_URL)
+    
+@app.get("/mikropos")
+def mikropos():
+    return preveriStatusStoritve(SERVICE_POSZAP_URL)
+
+# end checking other microservices
 # Za health checks 
     
 @app.get("/health")
-async def health():
+def health():
     return {"status": "ok"}    
     
 @app.get("/health/live")
