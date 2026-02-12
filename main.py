@@ -22,7 +22,7 @@ def validate_identifier(name: str) -> str:
         raise ValueError("Invalid database name")
     return name
 
-
+db_healthy = True
 app = FastAPI(root_path="/narspo")
 
 try:
@@ -37,6 +37,7 @@ try:
     )
 except Exception as e:
     print("Error: ",e)
+    db_healthy = False
     
 app.add_middleware(
     CORSMiddleware,
@@ -939,7 +940,10 @@ def health():
     
 @app.get("/health/live")
 def live():
-    return {"status": "alive"}
+    if db_healthy:
+        return {"status": "alive"}
+    else:
+        return Response(status_code=500)
 
 @app.get("/health/ready")
 def ready():
