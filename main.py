@@ -647,7 +647,7 @@ def testStrankeOld(stran: Stra281):
 
 @app.post("/teststranke/")
 def testStranke(stran: Stra281):
-    return dobiStranko(stran.ids,stran.uniqueid) 
+    return dobiStranke(stran.ids,stran.uniqueid) 
         
 # end gRPC transformation
 
