@@ -534,9 +534,10 @@ def dobiStranko(iduporabnik,uniqueid):
         with grpc.insecure_channel(SERVICE_UPOPRI_GRPC_URL) as channel:
             stub = upoprigrpc_pb2_grpc.UserServiceStub(channel)
             try:
+                print("gRPC zacetek:")
                 stranka_response = stub.Stranka(
                     upoprigrpc_pb2.GetStrankaRequest(
-                        IDUporabnik=iduporabnik,
+                        IDUporabnik=int(iduporabnik),
                         uniqueid=uniqueid
                     )
                 )
