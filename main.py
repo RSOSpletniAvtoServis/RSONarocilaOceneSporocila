@@ -590,8 +590,9 @@ def dobiZaposlenega(iduporabnik,idtennant,uniqueid):
         return {"Narocilo": "failed", "Error": e}
     return {"Narocilo": "failed"}
     
-    
-def dobiStranke(idstr,uniqueid):
+
+# gRPC transformation    
+def dobiStrankeOld(idstr,uniqueid):
     try:
         data = {"ids": idstr, "uniqueid": uniqueid}
         response = requests.post(f"{SERVICE_UPOPRI_URL}/izbranestranke/", json=data, timeout=5)
@@ -608,8 +609,47 @@ def dobiStranke(idstr,uniqueid):
         return {"Stranka": "failed", "Error": e}
     return {"Stranka": "failed"}   
     
-    
-    
+def dobiStranke(idstr,uniqueid):
+    try:
+        print("Zacetek gRPC:")
+        with grpc.insecure_channel(SERVICE_UPOPRI_GRPC_URL) as channel:
+            stub = upoprigrpc_pb2_grpc.UserServiceStub(channel)    
+            izbrane_response = stub.IzbraneStranke(
+                upoprigrpc_pb2.GetIzbraneStrankeRequest(
+                    ids=idstr,
+                    uniqueid=uniqueid
+                )
+            )
+            stranke_dict = {
+                s.IDStranka: {
+                    field.name: getattr(s, field.name)
+                    for field in s.DESCRIPTOR.fields
+                }
+                for s in izbrane_response.stranke
+            }            
+            print("\nIzbrane Stranke:")
+            for s in izbrane_response.stranke:
+                print(s)
+            print("hej hoj gRPC dela!!!")
+            return stranke_dict
+    except Exception as e:
+        print("Prislo je do napake: ", e)
+        return {"Stranka": "failed", "Error": e}
+    return {"Stranka": "failed"}
+
+class Stra281(BaseModel):
+    ids: List[int]
+    str: uniqueid
+
+@app.post("/teststrankeold/")
+def testStrankeOld(stran: Stra281):
+    return dobiStrankeOld(stran.ids,stran.uniqueid)
+
+@app.post("/teststranke/")
+def testStranke(stran: Stra281):
+    return dobiStranko(stran.ids,stran.uniqueid) 
+        
+# end gRPC transformation
 
     
 #Konec narocilo
