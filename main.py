@@ -640,7 +640,7 @@ def dobiStranke(idstr,uniqueid):
 
 class Stra281(BaseModel):
     ids: List[int]
-    str: uniqueid
+    uniqueid: str
 
 @app.post("/teststrankeold/")
 def testStrankeOld(stran: Stra281):
