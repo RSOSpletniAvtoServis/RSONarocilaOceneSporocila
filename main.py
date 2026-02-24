@@ -13,10 +13,17 @@ import os
 import time
 import requests
 
+import grpc
+
+import upoprigrpc_pb2
+import upoprigrpc_pb2_grpc
+
 adminbaza = os.getenv("ADMINBAZA", "RSOAdminVozila")
+
 SERVICE_ADMVOZ_URL = os.getenv("SERVICE_ADMVOZ_URL","http://admvoz:8000")
 SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL","http://upopri:8000")
 SERVICE_POSZAP_URL = os.getenv("SERVICE_POSZAP_URL","http://poszap:8000")
+SERVICE_UPOPRI_GRPC_URL = os.getenv("SERVICE_UPOPRI_GRPC_URL","upoprigrpc:50051")
 
 def validate_identifier(name: str) -> str:
     if not re.fullmatch(r"[A-Za-z0-9_]{1,64}", name):
@@ -498,7 +505,8 @@ def dobiVozila1(stsas,uniqueid):
         return {"Status": "failed", "Error": e}
     return {"Status": "failed"}    
 
-def dobiStranko(iduporabnik,uniqueid):
+# old
+def dobiStrankoOld(iduporabnik,uniqueid):
     try:
         data = {"iduporabnik": iduporabnik, "uniqueid": uniqueid}
         response = requests.post(f"{SERVICE_UPOPRI_URL}/stranka/", json=data, timeout=5)
@@ -516,7 +524,51 @@ def dobiStranko(iduporabnik,uniqueid):
         print("Prislo je do napake: ", e)
         return {"Narocilo": "failed", "Error": e}
     return {"Narocilo": "failed"}
+# old
+
+# new with gRPC
+
+def dobiStranko(iduporabnik,uniqueid):
+    try:
+        
+        with grpc.insecure_channel(SERVICE_UPOPRI_GRPC_URL) as channel:
+            stub = upoprigrpc_pb2_grpc.UserServiceStub(channel)
+            try:
+                stranka_response = stub.Stranka(
+                    upoprigrpc_pb2.GetStrankaRequest(
+                        IDUporabnik=iduporabnik,
+                        uniqueid=uniqueid
+                    )
+                )
+
+                print("\nStranka:")
+                print(stranka_response)
+                print("Hej hoj gRPC dela!!!")
+                return {"Narocilo": "passed", "IDStranka": stranka_response.IDStranka}
+            except grpc.RpcError as e:
+                print("Stranka error:", e.details())         
+    except Exception as e:
+        print("Prislo je do napake: ", e)
+        return {"Narocilo": "failed", "Error": e}
+    return {"Narocilo": "failed"}
+
+# end new with gRPC
+ 
+# test dobi_stranko
+
+class Stran938(BaseModel):
+    iduporabnik: str
+    uniqueid: str
+
+@app.post("/teststrankaold/")
+def testStrankaOld(stran: Stran938):
+    return dobiStrankoOld(stran.iduporabnik,stran.uniqueid)
+
+@app.post("/teststranka/")
+def testStranka(stran: Stran938):
+    return dobiStranko(stran.iduporabnik,stran.uniqueid) 
     
+# end test dobi_stranko    
     
 def dobiZaposlenega(iduporabnik,idtennant,uniqueid):
     try:
