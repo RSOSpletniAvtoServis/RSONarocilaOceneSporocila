@@ -460,9 +460,9 @@ def dobiStoritve(idstor,uniqueid):
             }
             for storitev in storitve_response.storitve:
                 print(storitev.IDStoritev, storitev.NazivStoritve)
-            print(result)
+            print(storitve_dict)
             print("hej hoj gRPC dela!")
-            return result
+            return storitve_dict
     except Exception as e:
         print("Prislo je do napake: ", e)
         return {"Status": "failed", "Error": e}
