@@ -20,7 +20,7 @@ import upoprigrpc_pb2
 import upoprigrpc_pb2_grpc
 
 adminbaza = os.getenv("ADMINBAZA", "RSOAdminVozila")
-
+DB_URL = os.getenv("DB_URL","127.0.0.1")
 SERVICE_ADMVOZ_URL = os.getenv("SERVICE_ADMVOZ_URL","http://admvoz:8000")
 SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL","http://upopri:8000")
 SERVICE_POSZAP_URL = os.getenv("SERVICE_POSZAP_URL","http://poszap:8000")
@@ -40,7 +40,7 @@ for i in range(5):
         pool = mysql.connector.pooling.MySQLConnectionPool(
             pool_name="mypool",
             pool_size=5,
-            host="127.0.0.1",                   #"34.44.150.229",
+            host=DB_URL,   #"127.0.0.1",                   #"34.44.150.229",
             user="zan",
             password=">tnitm&+NqgoA=q6",
             database="RSOAdminVozila",
