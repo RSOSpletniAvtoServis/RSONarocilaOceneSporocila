@@ -474,11 +474,11 @@ class Stor938(BaseModel):
 
 @app.post("/testizbstorold/")
 def testStrankaOld(stran: Stor938):
-    return dobiStrankoOld(stran.ids,stran.uniqueid)
+    return dobiStoritveOld(stran.ids,stran.uniqueid)
 
 @app.post("/testizbstor/")
 def testStranka(stran: Stor938):
-    return dobiStranko(stran.ids,stran.uniqueid)
+    return dobiStoritve(stran.ids,stran.uniqueid)
 
 
 # end test dobi storitve
