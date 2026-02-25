@@ -455,7 +455,7 @@ def dobiStoritve(idstor,uniqueid):
 
             print("\nStoritve:")
             storitve_dict = {
-                storitev.IDStoritve: storitev.NazivStoritve
+                storitev.IDStoritev: storitev.NazivStoritve
                 for storitev in storitve_response.storitve
             }
             for storitev in storitve_response.storitve:
