@@ -25,6 +25,7 @@ SERVICE_ADMVOZ_URL = os.getenv("SERVICE_ADMVOZ_URL","http://admvoz:8000")
 SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL","http://upopri:8000")
 SERVICE_POSZAP_URL = os.getenv("SERVICE_POSZAP_URL","http://poszap:8000")
 SERVICE_UPOPRI_GRPC_URL = os.getenv("SERVICE_UPOPRI_GRPC_URL","upoprigrpc:50051")
+SERVICE_ADMVOZ_GRPC_URL = os.getenv("SERVICE_ADMVOZ_GRPC_URL","admvozgrpc:50051")
 
 def validate_identifier(name: str) -> str:
     if not re.fullmatch(r"[A-Za-z0-9_]{1,64}", name):
@@ -417,7 +418,7 @@ def get_narocilaposlovalnica(nar: Narocilo1):
 
 # Konec narocila
 
-def dobiStoritve(idstor,uniqueid):
+def dobiStoritveold(idstor,uniqueid):
     try:
         data = {"ids": idstor,"uniqueid": uniqueid}
         response = requests.post(f"{SERVICE_ADMVOZ_URL}/izbranestoritve/", json=data, timeout=5)
@@ -433,7 +434,59 @@ def dobiStoritve(idstor,uniqueid):
         print("Prislo je do napake: ", e)
         return {"Status": "failed", "Error": e}
     return {"Status": "failed"}
+
+# dobi storitve gRPC
+
+def dobiStoritve(idstor,uniqueid):
+    try:
+        print("Zacetek gRPC")
+        with grpc.insecure_channel(SERVICE_ADMVOZ_GRPC_URL) as channel:
+            stub = admvozgrpc_pb2_grpc.AdminServiceStub(channel)
+
+            storitve_response = stub.IzbraneStoritve(
+                admvozgrpc_pb2.GetIzbraneStoritveRequest(
+                    ids=idstor,
+                    uniqueid=uniqueid
+                )
+            )
+
+            print("\nStoritve:")
+            storitve_dict = {
+                storitev.IDStoritve: storitev.NazivStoritve
+                for storitev in storitve_response.storitve
+            }
+            for storitev in storitve_response.storitve:
+                print(storitev.IDStoritev, storitev.NazivStoritve)
+            print(result)
+            print("hej hoj gRPC dela!")
+            return result
+    except Exception as e:
+        print("Prislo je do napake: ", e)
+        return {"Status": "failed", "Error": e}
+    return {"Status": "failed"}
     
+# end dobi storitve gRPC    
+
+# test dobi storitve 
+class Stor938(BaseModel):
+    ids: List[int]
+    uniqueid: str
+
+@app.post("/testizbstorold/")
+def testStrankaOld(stran: Stor938):
+    return dobiStrankoOld(stran.ids,stran.uniqueid)
+
+@app.post("/testizbstor/")
+def testStranka(stran: Stor938):
+    return dobiStranko(stran.ids,stran.uniqueid)
+
+
+# end test dobi storitve
+
+
+
+
+
     
 def dobiStatuse(idstat,uniqueid):
     try:
