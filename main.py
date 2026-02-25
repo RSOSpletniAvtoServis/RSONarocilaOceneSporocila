@@ -473,11 +473,11 @@ class Stor938(BaseModel):
     uniqueid: str
 
 @app.post("/testizbstorold/")
-def testStrankaOld(stran: Stor938):
+def testStorOld(stran: Stor938):
     return dobiStoritveOld(stran.ids,stran.uniqueid)
 
 @app.post("/testizbstor/")
-def testStranka(stran: Stor938):
+def testStor(stran: Stor938):
     return dobiStoritve(stran.ids,stran.uniqueid)
 
 
