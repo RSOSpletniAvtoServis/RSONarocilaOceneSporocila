@@ -474,7 +474,7 @@ class Stor938(BaseModel):
 
 @app.post("/testizbstorold/")
 def testStorOld(stran: Stor938):
-    return dobiStoritveOld(stran.ids,stran.uniqueid)
+    return dobiStoritveold(stran.ids,stran.uniqueid)
 
 @app.post("/testizbstor/")
 def testStor(stran: Stor938):
