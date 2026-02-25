@@ -19,6 +19,9 @@ import grpc
 import upoprigrpc_pb2
 import upoprigrpc_pb2_grpc
 
+import admvozgrpc_pb2
+import admvozgrpc_pb2_grpc
+
 adminbaza = os.getenv("ADMINBAZA", "RSOAdminVozila")
 DB_URL = os.getenv("DB_URL","127.0.0.1")
 SERVICE_ADMVOZ_URL = os.getenv("SERVICE_ADMVOZ_URL","http://admvoz:8000")
