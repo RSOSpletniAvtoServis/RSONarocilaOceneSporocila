@@ -24,9 +24,12 @@ import admvozgrpc_pb2_grpc
 
 adminbaza = os.getenv("ADMINBAZA", "RSOAdminVozila")
 DB_URL = os.getenv("DB_URL","127.0.0.1")
-SERVICE_ADMVOZ_URL = os.getenv("SERVICE_ADMVOZ_URL","http://admvoz:8000/admvoz")
-SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL","http://upopri:8000/upopri")
-SERVICE_POSZAP_URL = os.getenv("SERVICE_POSZAP_URL","http://poszap:8000/poszap")
+SERVICE_ADMVOZ_URL = os.getenv("SERVICE_ADMVOZ_URL","http://admvoz:8000")
+SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL","http://upopri:8000")
+SERVICE_POSZAP_URL = os.getenv("SERVICE_POSZAP_URL","http://poszap:8000")
+print("Path: "+SERVICE_UPOPRI_URL)
+print("Path: "+SERVICE_ADMVOZ_URL)
+print("Path: "+SERVICE_POSZAP_URL)
 SERVICE_UPOPRI_GRPC_URL = os.getenv("SERVICE_UPOPRI_GRPC_URL","upoprigrpc:50051")
 SERVICE_ADMVOZ_GRPC_URL = os.getenv("SERVICE_ADMVOZ_GRPC_URL","admvozgrpc:50051")
 
