@@ -1,6 +1,7 @@
 from typing import Union
 
 from fastapi import FastAPI
+from fastapi import Request
 
 from fastapi import HTTPException
 import mysql.connector
@@ -13,6 +14,8 @@ import os
 import time
 import requests
 from typing import List
+
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
 import grpc
 
@@ -32,6 +35,14 @@ print("Path: "+SERVICE_ADMVOZ_URL)
 print("Path: "+SERVICE_POSZAP_URL)
 SERVICE_UPOPRI_GRPC_URL = os.getenv("SERVICE_UPOPRI_GRPC_URL","upoprigrpc:50051")
 SERVICE_ADMVOZ_GRPC_URL = os.getenv("SERVICE_ADMVOZ_GRPC_URL","admvozgrpc:50051")
+
+REQUEST_COUNT = Counter(
+    'http_requests_total', 'Total HTTP requests', ['method', 'endpoint', 'http_status']
+)
+REQUEST_LATENCY = Histogram(
+    'http_request_latency_seconds', 'HTTP request latency', ['method', 'endpoint']
+)
+
 
 def validate_identifier(name: str) -> str:
     if not re.fullmatch(r"[A-Za-z0-9_]{1,64}", name):
@@ -69,6 +80,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def metrics_middleware(request: Request, call_next):
+    import time
+    start = time.time()
+    response = await call_next(request)
+    latency = time.time() - start
+    REQUEST_COUNT.labels(request.method, request.url.path, response.status_code).inc()
+    REQUEST_LATENCY.labels(request.method, request.url.path).observe(latency)
+    return response
 
 
 @app.get("/")
@@ -1112,4 +1133,7 @@ def ready():
     return {"status": "ready"}    
     
     
-    
+@app.get("/metrics")
+async def metrics():
+    from fastapi.responses import Response
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)    
